@@ -1,0 +1,58 @@
+﻿@page "/typeahead"
+@inject NavigationManager Nav
+@using Blazored.Typeahead
+
+<h1 id="@title" @ref="@titleRef">Type ahead</h1>
+
+<BlazoredTypeahead SearchMethod="SearchFilms"
+                   @bind-Value="selectedFilm">
+    <SelectedTemplate>
+        @context.Title
+    </SelectedTemplate>
+    <ResultTemplate>
+        @context.Title (@context.Year)
+    </ResultTemplate>
+</BlazoredTypeahead>
+
+<h3 id="navigateOnClick" @onclick='() => Nav.NavigateTo("FetchData")'>Navigate to fetch</h3>
+
+
+@if (selectedFilm != null)
+{
+    <text>You selected <strong>@selectedFilm.Title (@selectedFilm.Year)</strong></text>
+}
+
+@code
+{
+    ElementReference titleRef;
+    string title = "typeahead";
+    Film[] Films = new[]
+    {
+        new Film("Memento", 2000),
+        new Film("Insomnia", 2002),
+        new Film("Batman Begins", 2005),
+    };
+
+    Film selectedFilm;
+
+
+    private async Task<IEnumerable<Film>> SearchFilms(string searchText)
+    {
+        return await Task.FromResult(Films.Where(x => x.Title.ToLower().Contains(searchText.ToLower())).ToList());
+    }
+
+    public class Film
+    {
+        public Film(string name, int year)
+        {
+            Title = name;
+            Year = year;
+        }
+
+        public string Title { get; set; }
+
+        public int Year { get; set; }
+    }
+
+}
+

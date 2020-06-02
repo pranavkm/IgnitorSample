@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Ignitor" Version="3.0.0-rc2.19461.12" />
+    <PackageReference Include="Ignitor" Version="5.0.0-preview.4.20257.10" />
   </ItemGroup>
 
 </Project>

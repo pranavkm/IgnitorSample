@@ -38,6 +38,8 @@ namespace test
 
             await NavigateOnClick(client);
 
+            await TypeAhead(client);
+
             Console.WriteLine("Done");
         }
 
@@ -52,7 +54,8 @@ namespace test
 
             client.Hive.TryFindElementById("state", out var state);
 
-            await client.ExpectRenderBatch(() => changeState.ClickAsync(client.HubConnection));
+            await changeState.ClickAsync(client.HubConnection);
+            await client.PrepareForNextBatch(null);
 
             if (state.Attributes["data-state"].ToString() == "Clicked")
             {
@@ -78,7 +81,7 @@ namespace test
         static async Task Navigate(BlazorClient client)
         {
             var links = new[] { "counter", "fetchdata", "home" };
-            for (var i = 0; i < 12; i++)
+            for (var i = 0; i < 5; i++)
             {
                 var link = links[i % links.Length];
                 var batch = await client.ExpectRenderBatch(() => client.NavigateAsync(ServerUrl + "/" + link));
@@ -88,8 +91,10 @@ namespace test
                 }
 
                 Console.WriteLine($"Navigated to {link}.");
-                await Task.Delay(500);
+                await Task.Delay(50);
             }
+
+            Console.WriteLine("Completed navigation scenarios");
         }
 
         static async Task NavigateOnClick(BlazorClient client)
@@ -103,6 +108,28 @@ namespace test
             await navigateOnClick.ClickAsync(client.HubConnection);
             // Wait for one or more renders that causes fetchdata to have been updated.
             await client.ExistsAsync("fetchdata");
+
+            Console.WriteLine("Completed navigation on click scenarios");
+        }
+
+        static async Task TypeAhead(BlazorClient client)
+        {
+            var batch = await client.ExpectRenderBatch(() => client.NavigateAsync(ServerUrl + "/typeahead"));
+            if (!client.Hive.TryFindElementById("typeahead", out var _))
+            {
+                throw new InvalidOperationException($"Expected to have navigated to the typeahead page.");
+            }
+
+            if (!client.Hive.TryFindElementById("navigateOnClick", out var navigateOnClick))
+            {
+                throw new InvalidOperationException($"Expected to have navigated to the home page.");
+            }
+
+            await navigateOnClick.ClickAsync(client.HubConnection);
+            // Wait for one or more renders that causes fetchdata to have been updated.
+            await client.ExistsAsync("fetchdata");
+
+            Console.WriteLine("Completed TypeAhead scenario");
         }
     }
 
